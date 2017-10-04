@@ -8,10 +8,15 @@
 
 import Cocoa
 
+public protocol PasteboardManagerDelegate {
+    func itemSaved(item: String)
+}
+
 public class PasteboardManager {
     
     let pb = NSPasteboard.general
     let dataMgr = PHDataManagerCoreData()
+    var delegates = [PasteboardManagerDelegate]()
     
     public init() {
         ownChangeCount = pb.changeCount
@@ -46,6 +51,7 @@ public class PasteboardManager {
         if let currentStr = self.currentStringItem {
             _ = self.dataMgr.saveClippingString(content: currentStr)
             handler?()
+            self.notifyDelegatesItemSaved(item: currentStr)
         }
     }
     
@@ -57,5 +63,19 @@ public class PasteboardManager {
         }
         
         return false
+    }
+    
+    public func addDelegate(d: PasteboardManagerDelegate) {
+        self.delegates.append(d)
+    }
+    
+    public func clearDelegates() {
+        self.delegates.removeAll()
+    }
+    
+    func notifyDelegatesItemSaved(item: String) {
+        for delegate in self.delegates {
+            delegate.itemSaved(item: item)
+        }
     }
 }
