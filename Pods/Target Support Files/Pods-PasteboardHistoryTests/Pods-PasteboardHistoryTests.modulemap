@@ -1,0 +1,6 @@
+framework module Pods_PasteboardHistoryTests {
+  umbrella header "Pods-PasteboardHistoryTests-umbrella.h"
+
+  export *
+  module * { export * }
+}
