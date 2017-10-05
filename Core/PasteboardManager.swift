@@ -26,7 +26,7 @@ public class PasteboardManager {
         return pb.changeCount
     }
     
-    var currentStringItem: String? {
+    public var currentStringItem: String? {
         if pb.pasteboardItems!.count == 0 {
             return nil
         }
