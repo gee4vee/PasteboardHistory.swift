@@ -12,6 +12,8 @@
 		51066E9A1F835B9700317B0E /* StringPasteboardItem+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51066E961F835B9700317B0E /* StringPasteboardItem+CoreDataProperties.swift */; };
 		51066E9B1F835B9700317B0E /* PasteboardItem+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51066E971F835B9700317B0E /* PasteboardItem+CoreDataClass.swift */; };
 		51066E9C1F835B9700317B0E /* PasteboardItem+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51066E981F835B9700317B0E /* PasteboardItem+CoreDataProperties.swift */; };
+		514249761F8B380D00F07492 /* BinaryPasteboardItem+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514249741F8B380D00F07492 /* BinaryPasteboardItem+CoreDataClass.swift */; };
+		514249771F8B380D00F07492 /* BinaryPasteboardItem+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514249751F8B380D00F07492 /* BinaryPasteboardItem+CoreDataProperties.swift */; };
 		5157F6F91F82FE8500082EDE /* PasteboardHistory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5157F6EF1F82FE8500082EDE /* PasteboardHistory.framework */; };
 		5157F6FE1F82FE8500082EDE /* PasteboardHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5157F6FD1F82FE8500082EDE /* PasteboardHistoryTests.swift */; };
 		5157F7001F82FE8500082EDE /* PasteboardHistory.h in Headers */ = {isa = PBXBuildFile; fileRef = 5157F6F21F82FE8500082EDE /* PasteboardHistory.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -64,6 +66,8 @@
 		51066E961F835B9700317B0E /* StringPasteboardItem+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StringPasteboardItem+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		51066E971F835B9700317B0E /* PasteboardItem+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PasteboardItem+CoreDataClass.swift"; sourceTree = "<group>"; };
 		51066E981F835B9700317B0E /* PasteboardItem+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PasteboardItem+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		514249741F8B380D00F07492 /* BinaryPasteboardItem+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BinaryPasteboardItem+CoreDataClass.swift"; sourceTree = "<group>"; };
+		514249751F8B380D00F07492 /* BinaryPasteboardItem+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BinaryPasteboardItem+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		5157F6EF1F82FE8500082EDE /* PasteboardHistory.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PasteboardHistory.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5157F6F21F82FE8500082EDE /* PasteboardHistory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PasteboardHistory.h; sourceTree = "<group>"; };
 		5157F6F31F82FE8500082EDE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -143,6 +147,8 @@
 				51066E981F835B9700317B0E /* PasteboardItem+CoreDataProperties.swift */,
 				51066E951F835B9700317B0E /* StringPasteboardItem+CoreDataClass.swift */,
 				51066E961F835B9700317B0E /* StringPasteboardItem+CoreDataProperties.swift */,
+				514249741F8B380D00F07492 /* BinaryPasteboardItem+CoreDataClass.swift */,
+				514249751F8B380D00F07492 /* BinaryPasteboardItem+CoreDataProperties.swift */,
 				5157F6F31F82FE8500082EDE /* Info.plist */,
 			);
 			path = Core;
@@ -387,7 +393,9 @@
 			files = (
 				51B4EA481F84A18B008D32F4 /* PHDataMgr.swift in Sources */,
 				51066E991F835B9700317B0E /* StringPasteboardItem+CoreDataClass.swift in Sources */,
+				514249761F8B380D00F07492 /* BinaryPasteboardItem+CoreDataClass.swift in Sources */,
 				51066E9B1F835B9700317B0E /* PasteboardItem+CoreDataClass.swift in Sources */,
+				514249771F8B380D00F07492 /* BinaryPasteboardItem+CoreDataProperties.swift in Sources */,
 				51B4FDA61F83470900DD6981 /* Preferences.swift in Sources */,
 				51B4FD9F1F8345F800DD6981 /* PasteboardMonitor.swift in Sources */,
 				51B4FDA01F8345F800DD6981 /* PasteboardManager.swift in Sources */,

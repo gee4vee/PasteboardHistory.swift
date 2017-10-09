@@ -8,7 +8,9 @@
 
 import Cocoa
 
-// Defines the protocol for data managers for pasteboard history.
+/**
+ Defines the protocol for data managers for pasteboard history.
+ */
 protocol PHDataMgr: AnyObject {
     
     func refreshMaxSavedItems()
@@ -17,7 +19,9 @@ protocol PHDataMgr: AnyObject {
     
     func enforceMaxSavedItems(doSave: Bool)
     
-    func saveClippingString(content: String) -> StringPasteboardItem
+    func saveItemString(content: String) -> StringPasteboardItem
+    
+    func fetchById(id: String) -> PasteboardItem?
     
     func fetchByStringContent(content: String) -> StringPasteboardItem?
     
@@ -27,11 +31,36 @@ protocol PHDataMgr: AnyObject {
     
     func fetchTotalCount() -> Int
     
-    func deletebyStringContent(content: String) throws
+    func deleteById(id: String) throws
+    
+    func deleteByStringContent(content: String) throws
     
     func deleteAllPasteboardItems() throws
 }
 
+/**
+ Defines pasteboard item data types.
+ */
+public enum DataType: Int16 {
+    /**
+     An opaque string.
+     */
+    case string = 0
+    
+    /**
+     Binary data.
+     */
+    case binary = 1
+    
+    /**
+     A URL, e.g. for a web page.
+     */
+    case url = 2
+}
+
+/**
+ Defines possible data manager errors.
+ */
 public enum DataMgrError: Error {
     case DeleteFailed(cause: Error)
     case FetchFailed(cause: Error)

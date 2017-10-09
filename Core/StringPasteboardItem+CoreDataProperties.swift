@@ -17,10 +17,13 @@ extension StringPasteboardItem {
         return NSFetchRequest<StringPasteboardItem>(entityName: "StringPasteboardItem")
     }
 
+    /**
+     The content of the item.
+     */
     @NSManaged public var content: String?
     
     override public var description: String {
-        return "StringPasteboardItem[content=\"\(self.content ?? "")\", timestamp=\(self.timestamp!)]"
+        return "StringPasteboardItem[content=\"\(self.content ?? "")\", id=\"\(self.id ?? "<not_set>")\", timestamp=\(self.timestamp!)]"
     }
 
 }

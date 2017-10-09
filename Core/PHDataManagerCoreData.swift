@@ -16,6 +16,8 @@ public class PHDataManagerCoreData: NSObject, PHDataMgr {
     
     static let BASE_PB_ITEM_CLASS_NAME = "PasteboardItem"
     static let STRING_PB_ITEM_CLASS_NAME = "StringPasteboardItem"
+    static let BINARY_PB_ITEM_CLASS_NAME = "BinaryPasteboardItem"
+    
     var maxItems: Int = Preferences.DEFAULT_MAX_SAVED_ITEMS
     
     override public init() {
@@ -176,9 +178,7 @@ public class PHDataManagerCoreData: NSObject, PHDataMgr {
                 let overage = count - self.maxItems
                 let oldest = self.fetchOldest(numToFetch: overage)
                 for item in oldest {
-                    if let strItem = item as? StringPasteboardItem {
-                        try self.deletebyStringContent(content: strItem.content!)
-                    }
+                    try self.deleteById(id: item.id!)
                 }
             }
             if doSave {
@@ -190,7 +190,7 @@ public class PHDataManagerCoreData: NSObject, PHDataMgr {
         }
     }
     
-    public func saveClippingString(content: String) -> StringPasteboardItem {
+    public func saveItemString(content: String) -> StringPasteboardItem {
         var strItem: StringPasteboardItem? = nil
         if #available(OSX 10.12, *) {
             strItem = StringPasteboardItem(context: self.getManagedObjectCtx())
@@ -200,9 +200,26 @@ public class PHDataManagerCoreData: NSObject, PHDataMgr {
         }
         
         strItem!.content = content
-        NSLog("Saved \(content) as \(PHDataManagerCoreData.STRING_PB_ITEM_CLASS_NAME) = \(strItem!.content ?? "nil")")
+        NSLog("Saved new \(PHDataManagerCoreData.STRING_PB_ITEM_CLASS_NAME) = \(strItem!.content ?? "nil")")
         self.save(nil)
         return strItem!
+    }
+    
+    public func fetchById(id: String) -> PasteboardItem? {
+        let fetchReq: NSFetchRequest<PasteboardItem> = PasteboardItem.fetchRequest()
+        fetchReq.predicate = NSPredicate(format: "id == %@", argumentArray: [id])
+        let sortDesc = NSSortDescriptor(key: "timestamp", ascending: false)
+        fetchReq.sortDescriptors = [sortDesc]
+        do {
+            let results = try self.getManagedObjectCtx().fetch(fetchReq)
+            if results.count == 0 {
+                return nil
+            }
+            
+            return results[0]
+        } catch {
+            fatalError("Failed to fetch pasteboard items with id \(id): \(error)")
+        }
     }
     
     public func fetchByStringContent(content: String) -> StringPasteboardItem? {
@@ -253,11 +270,23 @@ public class PHDataManagerCoreData: NSObject, PHDataMgr {
             let count = try self.getManagedObjectCtx().count(for: fetchAllReq)
             return count
         } catch {
-            fatalError("Failed to fetch saved pasteboard items: \(error)")
+            fatalError("Failed to fetch saved pasteboard item count: \(error)")
         }
     }
     
-    public func deletebyStringContent(content: String) throws {
+    public func deleteById(id: String) throws {
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: PHDataManagerCoreData.BASE_PB_ITEM_CLASS_NAME)
+        fetchRequest.predicate = NSPredicate(format: "id == %@", argumentArray: [id])
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        do {
+            try self.getManagedObjectCtx().execute(deleteRequest)
+        } catch {
+            NSLog(error.localizedDescription)
+            throw DataMgrError.DeleteFailed(cause: error)
+        }
+    }
+    
+    public func deleteByStringContent(content: String) throws {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: PHDataManagerCoreData.BASE_PB_ITEM_CLASS_NAME)
         fetchRequest.predicate = NSPredicate(format: "content == %@", argumentArray: [content])
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)

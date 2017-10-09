@@ -13,4 +13,8 @@ import CoreData
 @objc(StringPasteboardItem)
 public class StringPasteboardItem: PasteboardItem {
 
+    public override func awakeFromInsert() {
+        super.awakeFromInsert()
+        self.dataType = DataType.string.rawValue
+    }
 }

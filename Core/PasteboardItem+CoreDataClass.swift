@@ -15,8 +15,8 @@ public class PasteboardItem: NSManagedObject {
     
     override public func awakeFromInsert() {
         super.awakeFromInsert()
-        let now = NSDate()
-        self.timestamp = now
+        self.timestamp = NSDate()
+        self.id = UUID().uuidString
     }
 
 }
