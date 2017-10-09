@@ -34,7 +34,6 @@ public class PHDataManagerCoreData: NSObject, PHDataMgr {
         if let defaults = notification.object as? UserDefaults {
             if let maxPref = defaults.string(forKey: Preferences.PREF_KEY_MAX_SAVED_ITEMS) {
                 self.maxItems = Int(maxPref)!
-                NSLog("Updated DataManager.maxItems=\(self.maxItems)")
             }
         }
     }
