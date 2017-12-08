@@ -30,8 +30,8 @@
     </entity>
     <fetchRequest name="FetchAllRequest" entity="PasteboardItem" predicateString="timestamp &gt; CAST(-978196529.746532, &quot;NSDate&quot;)"/>
     <elements>
+        <element name="BinaryPasteboardItem" positionX="-54" positionY="0" width="128" height="60"/>
         <element name="PasteboardItem" positionX="-63" positionY="-18" width="128" height="90"/>
         <element name="StringPasteboardItem" positionX="-54" positionY="0" width="128" height="60"/>
-        <element name="BinaryPasteboardItem" positionX="-54" positionY="0" width="128" height="60"/>
     </elements>
 </model>

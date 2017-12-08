@@ -49,7 +49,7 @@ public class PasteboardManager {
     
     public func saveCurrentItem(handler: (() -> Void)?) {
         if let currentStr = self.currentStringItem {
-            _ = self.dataMgr.saveItemString(content: currentStr)
+            _ = self.dataMgr.saveItemString(str: currentStr)
             handler?()
             self.notifyDelegatesItemSaved(item: currentStr)
         }

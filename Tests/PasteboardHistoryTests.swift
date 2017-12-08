@@ -43,12 +43,12 @@ class PasteboardHistoryTests: XCTestCase {
     }
     
     static func getRandomTestContentString() -> String {
-        return PasteboardHistoryTests.TEST_STRING_CONTENT + String(describing: PasteboardHistoryTests.randomNum())
+        return PasteboardHistoryTests.TEST_STRING_CONTENT + String(describing: randomNum())//UUID().uuidString
     }
     
     func testDataMgrSaveClippingString() {
         let testStr = PasteboardHistoryTests.getRandomTestContentString()
-        let strItem = self.dm.saveItemString(content: testStr)
+        let strItem = self.dm.saveItemString(str: testStr)
         XCTAssert(strItem.content! == testStr, "Unexpected saved content")
         let allItems = self.dm.fetchAllPasteboardItems()
         XCTAssert(allItems.count == 1, "Unexpected item count")
@@ -56,9 +56,27 @@ class PasteboardHistoryTests: XCTestCase {
         XCTAssert(fetchedItem.content! == testStr, "Unexpected saved content")
     }
     
+    func testDataMgrSaveClippingStringTwice() {
+        let testStr = PasteboardHistoryTests.getRandomTestContentString()
+        let strItem = self.dm.saveItemString(str: testStr)
+        XCTAssert((strItem.content ?? "nil") == testStr, "Unexpected saved content value: \(strItem.content ?? "nil")")
+        
+        var allItems = self.dm.fetchAllPasteboardItems()
+        XCTAssert(allItems.count == 1, "Unexpected item count")
+        let fetchedItem = allItems[0] as! StringPasteboardItem
+        XCTAssert(fetchedItem.content! == testStr, "Unexpected saved content")
+        
+        let strItem2 = self.dm.saveItemString(str: testStr)
+        XCTAssert((strItem2.content ?? "nil") == testStr, "Unexpected saved content value: \(strItem2.content ?? "nil")")
+        allItems = self.dm.fetchAllPasteboardItems()
+        XCTAssert(allItems.count == 1, "Unexpected item count")
+        let fetchedItem2 = allItems[0] as! StringPasteboardItem
+        XCTAssert(fetchedItem2.content! == fetchedItem.content!, "Unexpected saved content")
+    }
+    
     func testDataMgrDeleteClippingString() {
         let testStr = PasteboardHistoryTests.getRandomTestContentString()
-        let strItem = self.dm.saveItemString(content: testStr)
+        let strItem = self.dm.saveItemString(str: testStr)
         XCTAssert(strItem.content! == testStr, "Unexpected saved content")
         do {
             try self.dm.deleteByStringContent(content: testStr)
@@ -71,7 +89,7 @@ class PasteboardHistoryTests: XCTestCase {
     
     func testDataMgrFetchByStringContent() {
         let testStr = PasteboardHistoryTests.getRandomTestContentString()
-        let strItem = self.dm.saveItemString(content: testStr)
+        let strItem = self.dm.saveItemString(str: testStr)
         XCTAssert(strItem.content! == testStr, "Unexpected saved content")
         let fetchedItem = self.dm.fetchByStringContent(content: testStr)
         XCTAssert(fetchedItem!.content! == testStr, "Unexpected fetched content")
@@ -82,7 +100,7 @@ class PasteboardHistoryTests: XCTestCase {
         PreferencesManager.getPrefs().setValue(max, forKey: Preferences.PREF_KEY_MAX_SAVED_ITEMS)
         for _ in 1...(max+1) {
             let testStr = PasteboardHistoryTests.getRandomTestContentString()
-            _ = self.dm.saveItemString(content: testStr)
+            _ = self.dm.saveItemString(str: testStr)
         }
         
         let total = self.dm.fetchTotalCount()
@@ -93,48 +111,57 @@ class PasteboardHistoryTests: XCTestCase {
     }
     
     func testPbMonCopyString() {
-        let testStr = PasteboardHistoryTests.getRandomTestContentString()
+        let pbm = PasteboardMonitor(pbMgr: self.pb)
+        let exp = expectation(description: "PBCopy")
+        let testStr = PasteboardHistoryTests.getRandomTestContentString() + UUID().uuidString
         self.pb.setPasteboard(testStr)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2), execute: {
-            let fetchedItem = self.dm.fetchByStringContent(content: testStr)
-            XCTAssert(fetchedItem != nil, "Fetched item is nil")
-            XCTAssert(fetchedItem!.content! == testStr, "Unexpected fetched content")
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3), execute: {
+            if let fetchedItem = self.dm.fetchByStringContent(content: testStr) {
+                XCTAssert((fetchedItem.content ?? "nil") == testStr, "Unexpected fetched content value: \(fetchedItem.content ?? "nil")")
+            } else {
+                XCTFail("Fetched item is nil")
+            }
+            exp.fulfill()
+            pbm.invalidateTimer()
         })
+        NSLog("Waiting for PBCopy")
+        wait(for: [exp], timeout: 30)
     }
     
     func testPerformanceSaveClippingString() {
         let testStr = PasteboardHistoryTests.getRandomTestContentString()
         self.measure {
-            _ = self.dm.saveItemString(content: testStr)
+            _ = self.dm.saveItemString(str: testStr)
         }
     }
     
     func testPerformanceSaveClippingStringMany() {
         self.measure {
-            let maxNum = 100
+            let maxNum = 20
             PreferencesManager.getPrefs().set(maxNum, forKey: Preferences.PREF_KEY_MAX_SAVED_ITEMS)
             for _ in 1...maxNum {
-                let testStr = PasteboardHistoryTests.getRandomTestContentString()
-                _ = self.dm.saveItemString(content: testStr)
+                let testStr = PasteboardHistoryTests.getRandomTestContentString() + UUID().uuidString
+                let newItem = self.dm.saveItemString(str: testStr)
+                XCTAssert(newItem.content != nil, "New item content is nil")
             }
         }
     }
     
     func testPerformanceFetchAll() {
         let testStr = PasteboardHistoryTests.getRandomTestContentString()
-        _ = self.dm.saveItemString(content: testStr)
+        _ = self.dm.saveItemString(str: testStr)
         self.measure {
             _ = self.dm.fetchAllPasteboardItems()
         }
     }
     
     func testPerformanceFetchAllMany() {
-        let maxNum = 1000
+        let maxNum = 100
         PreferencesManager.getPrefs().set(maxNum, forKey: Preferences.PREF_KEY_MAX_SAVED_ITEMS)
         for _ in 1...maxNum {
             let testStr = PasteboardHistoryTests.getRandomTestContentString()
-            _ = self.dm.saveItemString(content: testStr)
+            _ = self.dm.saveItemString(str: testStr)
         }
         self.measure {
             _ = self.dm.fetchAllPasteboardItems()
@@ -143,7 +170,7 @@ class PasteboardHistoryTests: XCTestCase {
     
     func testPerformanceFetchByStringContent() {
         let testStr = PasteboardHistoryTests.getRandomTestContentString()
-        _ = self.dm.saveItemString(content: testStr)
+        _ = self.dm.saveItemString(str: testStr)
         self.measure {
             _ = self.dm.fetchByStringContent(content: testStr)
         }
@@ -151,9 +178,10 @@ class PasteboardHistoryTests: XCTestCase {
     
     func testPerformanceDeleteByStringContent() {
         let testStr = PasteboardHistoryTests.getRandomTestContentString()
-        _ = self.dm.saveItemString(content: testStr)
+        _ = self.dm.saveItemString(str: testStr)
         self.measure {
             do {
+                NSLog("Attempting to save \(testStr)")
                 try self.dm.deleteByStringContent(content: testStr)
             } catch {
                 XCTFail(error.localizedDescription)
@@ -162,12 +190,13 @@ class PasteboardHistoryTests: XCTestCase {
     }
     
     func testPerformanceDeleteByStringContentMany() {
-        let maxNum = 1000
+        let maxNum = 20
         PreferencesManager.getPrefs().set(maxNum, forKey: Preferences.PREF_KEY_MAX_SAVED_ITEMS)
         var data = [String]()
         for _ in 1...maxNum {
-            let testStr = PasteboardHistoryTests.getRandomTestContentString()
-            _ = self.dm.saveItemString(content: testStr)
+            let testStr = PasteboardHistoryTests.getRandomTestContentString() + UUID().uuidString
+            let newItem = self.dm.saveItemString(str: testStr)
+            XCTAssert(newItem.content != nil, "New item content is nil")
             data.append(testStr)
         }
         

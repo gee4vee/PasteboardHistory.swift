@@ -20,6 +20,8 @@ public class PHDataManagerCoreData: NSObject, PHDataMgr {
     
     var maxItems: Int = Preferences.DEFAULT_MAX_SAVED_ITEMS
     
+    var observer: CoreDataContextObserver?
+    
     override public init() {
         super.init()
         self.refreshMaxSavedItems()
@@ -74,16 +76,21 @@ public class PHDataManagerCoreData: NSObject, PHDataMgr {
                 fatalError("Unresolved error \(error)")
             }
         })
-        container.viewContext.mergePolicy = NSMergePolicy.init(merge: NSMergePolicyType.overwriteMergePolicyType)
         return container
     }()
     
     public func getManagedObjectCtx() -> NSManagedObjectContext {
+        var ctx: NSManagedObjectContext?
         if #available(OSX 10.12, *) {
-            return self.persistentContainer.viewContext
+            ctx = self.persistentContainer.viewContext
         } else {
-            return self.managedObjectContext
+            ctx = self.managedObjectContext
         }
+        
+        let mp = NSMergePolicy.init(merge: NSMergePolicyType.mergeByPropertyStoreTrumpMergePolicyType)
+        ctx?.mergePolicy = mp
+        self.observer = CoreDataContextObserver(context: ctx!)
+        return ctx!
     }
     
     @available(macOS 10.11, *)
@@ -102,9 +109,7 @@ public class PHDataManagerCoreData: NSObject, PHDataMgr {
         
         // Configure Managed Object Context
         managedObjectContext.persistentStoreCoordinator = persistentStoreCoordinator
-        // if another pasteboard item comes in that matches one that is already saved,
-        // we want to overwrite what's saved to ensure uniqueness.
-        managedObjectContext.mergePolicy = NSMergePolicy.init(merge: NSMergePolicyType.overwriteMergePolicyType)
+        managedObjectContext.mergePolicy = NSMergePolicy.init(merge: NSMergePolicyType.mergeByPropertyStoreTrumpMergePolicyType)
         
         return managedObjectContext
     }()
@@ -190,8 +195,8 @@ public class PHDataManagerCoreData: NSObject, PHDataMgr {
         }
     }
     
-    public func saveItemString(content: String) -> StringPasteboardItem {
-        var strItem: StringPasteboardItem? = nil
+    public func saveItemString(str: String) -> StringPasteboardItem {
+        var strItem: StringPasteboardItem?
         if #available(OSX 10.12, *) {
             strItem = StringPasteboardItem(context: self.getManagedObjectCtx())
         } else {
@@ -199,10 +204,34 @@ public class PHDataManagerCoreData: NSObject, PHDataMgr {
             strItem = NSEntityDescription.insertNewObject(forEntityName: PHDataManagerCoreData.STRING_PB_ITEM_CLASS_NAME, into: self.getManagedObjectCtx()) as? StringPasteboardItem
         }
         
-        strItem!.content = content
-        NSLog("Saved new \(PHDataManagerCoreData.STRING_PB_ITEM_CLASS_NAME) = \(strItem!.content ?? "nil")")
+        strItem!.content = str
         self.save(nil)
+        NSLog("Saved new \(PHDataManagerCoreData.STRING_PB_ITEM_CLASS_NAME): \(strItem!.content ?? "nil")")
         return strItem!
+    }
+    
+    public func saveItemBinary(blob: NSData) -> BinaryPasteboardItem {
+        var bItem: BinaryPasteboardItem?
+        if #available(OSX 10.12, *) {
+            bItem = BinaryPasteboardItem(context: self.getManagedObjectCtx())
+        } else {
+            // Fallback on earlier versions
+            bItem = NSEntityDescription.insertNewObject(forEntityName: PHDataManagerCoreData.BINARY_PB_ITEM_CLASS_NAME, into: self.getManagedObjectCtx()) as? BinaryPasteboardItem
+        }
+        
+        bItem!.binContent = blob
+        // TODO update ID based on binary data.
+        self.observer?.observeObject(object: bItem!, completionBlock: {(object, state) in
+            if let updatedContent = object.committedValues(forKeys: ["binContent"])["binContent"] as? NSData {
+                if let binaryObj = object as? BinaryPasteboardItem {
+                    // TODO update ID based on binary data.
+                    NSLog("Binary data for item \(binaryObj.id ?? "nil") updated with size \(updatedContent.length)")
+                }
+            }
+        })
+        self.save(nil)
+        NSLog("Saved new \(PHDataManagerCoreData.BINARY_PB_ITEM_CLASS_NAME) with data size \(bItem!.binContent?.length ?? -1)")
+        return bItem!
     }
     
     public func fetchById(id: String) -> PasteboardItem? {

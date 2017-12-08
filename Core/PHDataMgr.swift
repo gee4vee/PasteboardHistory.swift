@@ -19,7 +19,9 @@ protocol PHDataMgr: AnyObject {
     
     func enforceMaxSavedItems(doSave: Bool)
     
-    func saveItemString(content: String) -> StringPasteboardItem
+    func saveItemString(str: String) -> StringPasteboardItem
+    
+    func saveItemBinary(blob: NSData) -> BinaryPasteboardItem
     
     func fetchById(id: String) -> PasteboardItem?
     

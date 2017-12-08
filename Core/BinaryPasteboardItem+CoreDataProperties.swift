@@ -17,6 +17,9 @@ extension BinaryPasteboardItem {
         return NSFetchRequest<BinaryPasteboardItem>(entityName: "BinaryPasteboardItem")
     }
 
+    /**
+     The binary data of this item.
+     */
     @NSManaged public var binContent: NSData?
     
     override public var description: String {
